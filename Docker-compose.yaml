@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Donor-NGO MCP Server (Python FastAPI)
+  donor-ngo-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile  # <- make sure this is the Python Dockerfile we wrote for main.py
+    container_name: donor-ngo-mcp-server
+    environment:
+      - PORT=8003
+    ports:
+      - "8003:8003"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # n8n Instance
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-instance
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=UTC
+      - N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true
+      # Enable MCP functionality
+      - N8N_FEATURE_FLAG_MCP=true
+
+      # Optional: Set log level
+      - N8N_LOG_LEVEL=info
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # Mount AWS credentials if using file-based auth
+      - ~/.aws:/home/node/.aws:ro
+    restart: unless-stopped
+    depends_on:
+      donor-ngo-mcp-server:
+        condition: service_healthy
+
+  # Optional: Redis for n8n session storage (recommended for production)
+  redis:
+    image: redis:7-alpine
+    container_name: n8n-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
+    driver: local
+  redis_data:
+    driver: local

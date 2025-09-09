@@ -1,0 +1,18 @@
+# Core web framework
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+
+# HTTP client
+httpx==0.27.0
+
+# Data validation / parsing (FastAPI uses Pydantic)
+pydantic==2.8.2
+
+# For CORS support (already in FastAPI but explicit is good)
+starlette==0.37.2
+
+# Optional: useful for async tasks and retry logic
+tenacity==8.3.0
+
+# Optional: logging helpers
+python-json-logger==2.0.7
