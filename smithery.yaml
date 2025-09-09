@@ -1,0 +1,50 @@
+# Smithery configuration file for Cause-Connect MCP Server
+# https://smithery.ai/docs/build/project-config
+
+runtime: "container"
+
+build:
+  dockerBuildPath: "./"
+
+startCommand:
+  type: "http"
+  configSchema:
+    type: "object"
+    required: ["everyOrgApiKey"]
+    properties:
+      everyOrgApiKey:
+        type: "string"
+        title: "Every.org API Key"
+        description: "Your Every.org API key for nonprofit data access"
+      authMode:
+        type: "string"
+        title: "Authentication Mode"
+        description: "Authentication mode for the server"
+        enum: ["AUTO", "STRICT"]
+        default: "AUTO"
+      logLevel:
+        type: "string"
+        title: "Log Level"
+        description: "Logging level for the server"
+        enum: ["debug", "info", "warning", "error"]
+        default: "info"
+
+  commandFunction: |
+    (config) => ({
+      command: "python",
+      args: ["main.py", "--host", "0.0.0.0", "--port", process.env.PORT || "8003"],
+      env: {
+        EVERY_ORG_API_KEY: config.everyOrgApiKey,
+        AUTH_MODE: config.authMode || "AUTO",
+        LOG_LEVEL: config.logLevel || "info",
+        PORT: process.env.PORT || "8003"
+      }
+    })
+
+environment:
+  PORT: "8003"
+
+exampleConfig:
+  everyOrgApiKey: "pk_live_your_api_key_here"
+  authMode: "AUTO"
+  logLevel: "info"
