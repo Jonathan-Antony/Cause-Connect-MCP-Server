@@ -1,4 +1,4 @@
-# MCP Donor-NGO Server
+# Cause Connect Server
 
 A Model Context Protocol (MCP) server that facilitates donor-NGO interactions with integrated Every.org nonprofit data access. This server provides tools for nonprofit discovery, donation management, compliance tracking, sponsor matching, and analytics.
 
